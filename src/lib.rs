@@ -14,6 +14,7 @@ use tokio_tungstenite::{
     },
     MaybeTlsStream, WebSocketStream,
 };
+use http::Request;
 
 use std::collections::HashMap;
 
@@ -86,8 +87,16 @@ fn connect<R: Runtime>(
     config: Option<ConnectionConfig>,
 ) -> Result<Id> {
     let id = rand::random();
+
+    println!("yes I did");
+
+    let req = Request::builder()
+        .uri(url)
+        .header("Origin", "https://live.bilibili.com")
+        .body(())?;
+
     let (ws_stream, _) =
-        tauri::async_runtime::block_on(connect_async_with_config(url, config.map(Into::into)))?;
+        tauri::async_runtime::block_on(connect_async_with_config(req, config.map(Into::into)))?;
 
     tauri::async_runtime::spawn(async move {
         let (write, read) = ws_stream.split();
